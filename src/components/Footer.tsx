@@ -44,7 +44,7 @@ export function Footer() {
         
         <div className="mt-8 pt-8 border-t">
           <p className="text-center text-sm text-muted-foreground">
-            © 2024 AutoSMM. Sva prava pridržana.
+            © 2025 AutoSMM. Sva prava pridržana.
           </p>
         </div>
       </div>

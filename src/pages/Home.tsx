@@ -150,7 +150,7 @@ export default function Home() {
       <section className="py-12 md:py-24">
         <div className="container px-4 md:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Zašto AutoSMM?</h2>
+            <h2 className="text-3xl font-bold mb-4">Zašto PostPilot?</h2>
             <p className="text-muted-foreground max-w-[600px] mx-auto">
               Napredne funkcionalnosti koje čine upravljanje društvenim mrežama jednostavnim i efikasnim
             </p>
@@ -273,7 +273,7 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-sm mb-4">
-                  "AutoSMM mi je omogućio da se fokusiram na svoj posao dok se moje društvene mreže 
+                  "PostPilot mi je omogućio da se fokusiram na svoj posao dok se moje društvene mreže 
                   automatski ažuriraju kvalitetnim sadržajem."
                 </p>
                 <div className="font-semibold text-sm">Ana Marić</div>
@@ -289,7 +289,7 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-sm mb-4">
-                  "Kao vlasnik male trgovine, AutoSMM mi štedi sate vremena tjedno. 
+                  "Kao vlasnik male trgovine, PostPilot mi štedi sate vremena tjedno. 
                   AI generacija sadržaja je fantastična!"
                 </p>
                 <div className="font-semibold text-sm">Marko Horvat</div>
@@ -324,7 +324,7 @@ export default function Home() {
               Spremni za automatizaciju vaših društvenih mreža?
             </h2>
             <p className="text-lg mb-8 opacity-90">
-              Pridružite se tisućama zadovoljnih korisnika koji već koriste AutoSMM
+              Pridružite se tisućama zadovoljnih korisnika koji već koriste PostPilot
             </p>
             <Button size="lg" variant="secondary" asChild>
               <Link to="/register">

@@ -10,7 +10,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <BarChart3 className="h-6 w-6 text-primary" />
-              <span className="font-bold text-xl">AutoSMM</span>
+              <span className="font-bold text-xl">PostPilot</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Automatizacija društvenih mreža za male poduzetnike i freelancere.
@@ -43,9 +43,9 @@ export function Footer() {
         </div>
         
         <div className="mt-8 pt-8 border-t">
-          <p className="text-center text-sm text-muted-foreground">
-            © 2025 AutoSMM. Sva prava pridržana.
-          </p>
+            <p className="text-center text-sm text-muted-foreground">
+              © 2025 PostPilot. Sva prava pridržana.
+            </p>
         </div>
       </div>
     </footer>

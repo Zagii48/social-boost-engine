@@ -13,6 +13,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -40,7 +41,7 @@ export default function Register() {
 
     setLoading(true);
 
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(email, password, fullName);
 
     if (!error) {
       navigate('/login');
@@ -55,11 +56,11 @@ export default function Register() {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2 mb-4">
             <BarChart3 className="h-8 w-8 text-primary" />
-            <span className="font-bold text-2xl">AutoSMM</span>
+            <span className="font-bold text-2xl">PostPilot</span>
           </Link>
           <h1 className="text-2xl font-bold">Stvorite račun</h1>
           <p className="text-muted-foreground mt-2">
-            Registrirajte se i počnite koristiti AutoSMM besplatno
+            Registrirajte se i počnite koristiti PostPilot besplatno
           </p>
         </div>
 
@@ -77,6 +78,18 @@ export default function Register() {
                   {error}
                 </div>
               )}
+
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Ime i prezime</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="Vaše ime i prezime"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>

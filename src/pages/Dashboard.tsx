@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthProvider';
+import { PostCalendar } from '@/components/PostCalendar';
 import { 
   Plus, 
   Calendar, 
@@ -14,7 +14,10 @@ import {
   Instagram, 
   Facebook,
   MoreHorizontal,
-  Eye
+  Eye,
+  Crown,
+  BarChart3,
+  Users
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -22,10 +25,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  scheduledFor: Date;
+  platforms: string[];
+  status: 'scheduled' | 'published' | 'failed';
+  imageUrl: string | null;
+}
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const [posts, setPosts] = useState([
+  const { user, profile } = useAuth();
+  const [posts, setPosts] = useState<Post[]>([
     {
       id: '1',
       title: 'Promocija novih proizvoda',
@@ -95,13 +114,35 @@ export default function Dashboard() {
   const publishedPosts = posts.filter(p => p.status === 'published').length;
   const failedPosts = posts.filter(p => p.status === 'failed').length;
 
+  const getPlanBadge = (plan: string) => {
+    switch (plan) {
+      case 'pro':
+        return <Badge variant="default" className="bg-blue-500"><Crown className="w-3 h-3 mr-1" />Pro</Badge>;
+      case 'premium':
+        return <Badge variant="default" className="bg-gradient-to-r from-purple-500 to-pink-500"><Crown className="w-3 h-3 mr-1" />Premium</Badge>;
+      default:
+        return <Badge variant="outline">Free</Badge>;
+    }
+  };
+
+  const getGreeting = () => {
+    const name = profile?.full_name;
+    if (name) {
+      return `Dobrodošao nazad, ${name.split(' ')[0]}!`;
+    }
+    return `Dobrodošao nazad!`;
+  };
+
   return (
     <div className="container py-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Dobrodošli natrag, {user?.email}! Evo pregleda vaših objava.
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            {profile?.plan && getPlanBadge(profile.plan)}
+          </div>
+          <p className="text-muted-foreground">
+            {getGreeting()} Evo pregleda vaših objava.
           </p>
         </div>
         <Button asChild>
@@ -167,85 +208,165 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Posts List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Vaše objave</CardTitle>
-          <CardDescription>
-            Pregled svih vaših objava s mogućnostima upravljanja
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {posts.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Nema objava</h3>
-              <p className="text-muted-foreground mb-4">
-                Još niste stvorili nijednu objavu. Počnite sada!
-              </p>
-              <Button asChild>
-                <Link to="/new-post">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Stvori prvu objavu
-                </Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <div key={post.id} className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold">{post.title}</h3>
-                      {getStatusBadge(post.status)}
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {post.content}
-                    </p>
-                    
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {formatDate(post.scheduledFor)}
+      {/* Main Content with Tabs */}
+      <Tabs defaultValue="calendar" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3">
+          <TabsTrigger value="calendar">
+            <Calendar className="w-4 h-4 mr-2" />
+            Kalendar
+          </TabsTrigger>
+          <TabsTrigger value="posts">
+            <Clock className="w-4 h-4 mr-2" />
+            Lista objava
+          </TabsTrigger>
+          {profile?.plan === 'premium' && (
+            <TabsTrigger value="analytics">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analitika
+            </TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="calendar">
+          <PostCalendar posts={posts} userPlan={profile?.plan || 'free'} />
+        </TabsContent>
+
+        <TabsContent value="posts">
+          <Card>
+            <CardHeader>
+              <CardTitle>Vaše objave</CardTitle>
+              <CardDescription>
+                Pregled svih vaših objava s mogućnostima upravljanja
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {posts.length === 0 ? (
+                <div className="text-center py-12">
+                  <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Nema objava</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Još niste stvorili nijednu objavu. Počnite sada!
+                  </p>
+                  <Button asChild>
+                    <Link to="/new-post">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Stvori prvu objavu
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {posts.map((post) => (
+                    <div key={post.id} className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">{post.title}</h3>
+                          {getStatusBadge(post.status)}
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          {post.content}
+                        </p>
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {formatDate(post.scheduledFor)}
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            {post.platforms.map((platform) => (
+                              <div key={platform} className="flex items-center gap-1">
+                                {getPlatformIcon(platform)}
+                                <span className="capitalize">{platform}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                       
-                      <div className="flex items-center gap-2">
-                        {post.platforms.map((platform) => (
-                          <div key={platform} className="flex items-center gap-1">
-                            {getPlatformIcon(platform)}
-                            <span className="capitalize">{platform}</span>
-                          </div>
-                        ))}
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Pregled
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            Uredi
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive">
+                            Obriši
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                  </div>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Pregled
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        Uredi
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Obriši
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {profile?.plan === 'premium' && (
+          <TabsContent value="analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Analitika
+                  <Badge variant="default" className="bg-gradient-to-r from-purple-500 to-pink-500">
+                    Premium
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Detaljni uvidi u performanse vaših objava
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm font-medium">Ukupni doseg</span>
+                    </div>
+                    <div className="text-2xl font-bold">12.5K</div>
+                    <p className="text-xs text-green-600">+15% ovaj mjesec</p>
+                  </Card>
+                  
+                  <Card className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="text-sm font-medium">Angažman</span>
+                    </div>
+                    <div className="text-2xl font-bold">8.2%</div>
+                    <p className="text-xs text-green-600">+3% ovaj mjesec</p>
+                  </Card>
+                  
+                  <Card className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <BarChart3 className="w-4 h-4 text-purple-500" />
+                      <span className="text-sm font-medium">Najbolja objava</span>
+                    </div>
+                    <div className="text-2xl font-bold">2.1K</div>
+                    <p className="text-xs text-muted-foreground">lajkova</p>
+                  </Card>
+                </div>
+                
+                <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    📊 Detaljniji izvještaji i dodatne analitike uskoro dostupne!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+      </Tabs>
 
       {/* Fixed CTA for mobile */}
       <div className="fixed bottom-4 right-4 sm:hidden">
